@@ -1,17 +1,25 @@
+![Github-repository-banner](https://user-images.githubusercontent.com/99991493/228941877-13b3c23c-8989-4070-8631-dac2d4e0564b.png)
+
+
 Purpose
 ----------
-The purpose of this fork is to comment out the following section in the Compat.py file so that pyinstaller will not check if pathlib is installed. 
+The purpose of this fork is to comment out the following section in the Compat.py file so that pyinstaller will not check if pathlib is installed.
+
+```
 for name in ["enum34", "typing", "pathlib"]:
-try:
-dist = distribution(name)
-except PackageNotFoundError:
-continue
-remove = "conda remove" if is_conda else f'"{sys.executable}" -m pip uninstall {name}'
-raise SystemExit(
-f"The '{name}' package is an obsolete backport of a standard library package and is incompatible with "
-f"PyInstaller. Please remove this package (located in {dist.locate_file('')}) using\n    {remove}\n"
+	try:
+		dist = distribution(name)
+		except PackageNotFoundError:
+		continue
+	remove = "conda remove" if is_conda else f'"{sys.executable}" -m pip 				uninstall {name}'
+		raise SystemExit(
+		f"The '{name}' package is an obsolete backport of a standard library package and is incompatible with "
+		f"PyInstaller. Please remove this package (located in {dist.locate_file('')}) using\n    {remove}\n"
 "then try again."
- )
+ ) ;
+ ```
+ 
+ 
  Installation
 ------------
 
