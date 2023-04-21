@@ -43,19 +43,19 @@ is_py39 = sys.version_info >= (3, 9)
 is_py310 = sys.version_info >= (3, 10)
 is_py311 = sys.version_info >= (3, 11)
 
-is_win = sys.platform.startswith('win')
-is_win_10 = is_win and (platform.win32_ver()[0] == '10')
+is_win = sys.platform.startswith("win")
+is_win_10 = is_win and (platform.win32_ver()[0] == "10")
 is_win_wine = False  # Running under Wine; determined later on.
-is_cygwin = sys.platform == 'cygwin'
-is_darwin = sys.platform == 'darwin'  # Mac OS X
+is_cygwin = sys.platform == "cygwin"
+is_darwin = sys.platform == "darwin"  # Mac OS X
 
 # Unix platforms
-is_linux = sys.platform.startswith('linux')
-is_solar = sys.platform.startswith('sun')  # Solaris
-is_aix = sys.platform.startswith('aix')
-is_freebsd = sys.platform.startswith('freebsd')
-is_openbsd = sys.platform.startswith('openbsd')
-is_hpux = sys.platform.startswith('hp-ux')
+is_linux = sys.platform.startswith("linux")
+is_solar = sys.platform.startswith("sun")  # Solaris
+is_aix = sys.platform.startswith("aix")
+is_freebsd = sys.platform.startswith("freebsd")
+is_openbsd = sys.platform.startswith("openbsd")
+is_hpux = sys.platform.startswith("hp-ux")
 
 # Some code parts are similar to several unix platforms (e.g. Linux, Solaris, AIX).
 # Mac OS is not considered as unix since there are many platform-specific details for Mac in PyInstaller.
@@ -66,7 +66,9 @@ is_unix = is_linux or is_solar or is_aix or is_freebsd or is_hpux or is_openbsd
 is_musl = is_linux and "musl" in subprocess.getoutput(["ldd"])
 
 # macOS version
-_macos_ver = tuple(int(x) for x in platform.mac_ver()[0].split('.')) if is_darwin else None
+_macos_ver = (
+    tuple(int(x) for x in platform.mac_ver()[0].split(".")) if is_darwin else None
+)
 
 # macOS 11 (Big Sur): if python is not compiled with Big Sur support, it ends up in compatibility mode by default, which
 # is indicated by platform.mac_ver() returning '10.16'. The lack of proper Big Sur support breaks find_library()
@@ -77,8 +79,14 @@ _macos_ver = tuple(int(x) for x in platform.mac_ver()[0].split('.')) if is_darwi
 # disabling the compatibility mode and using python that does not properly support Big Sur still leaves find_library()
 # broken (which is a scenario that we ignore at the moment).
 # The same logic applies to macOS 12 (Monterey).
-is_macos_11_compat = bool(_macos_ver) and _macos_ver[0:2] == (10, 16)  # Big Sur or newer in compat mode
-is_macos_11_native = bool(_macos_ver) and _macos_ver[0:2] >= (11, 0)  # Big Sur or newer in native mode
+is_macos_11_compat = bool(_macos_ver) and _macos_ver[0:2] == (
+    10,
+    16,
+)  # Big Sur or newer in compat mode
+is_macos_11_native = bool(_macos_ver) and _macos_ver[0:2] >= (
+    11,
+    0,
+)  # Big Sur or newer in native mode
 is_macos_11 = is_macos_11_compat or is_macos_11_native  # Big Sur or newer
 
 # On different platforms is different file for dynamic python library.
@@ -87,53 +95,59 @@ is_macos_11 = is_macos_11_compat or is_macos_11_native  # Big Sur or newer
 _pyver = sys.version_info[:2]
 if is_win or is_cygwin:
     PYDYLIB_NAMES = {
-        'python%d%d.dll' % _pyver,
-        'libpython%d%d.dll' % _pyver,
-        'libpython%d%dm.dll' % _pyver,
-        'libpython%d.%d.dll' % _pyver,
-        'libpython%d.%dm.dll' % _pyver
+        "python%d%d.dll" % _pyver,
+        "libpython%d%d.dll" % _pyver,
+        "libpython%d%dm.dll" % _pyver,
+        "libpython%d.%d.dll" % _pyver,
+        "libpython%d.%dm.dll" % _pyver,
     }  # For MSYS2 environment
 elif is_darwin:
     # libpython%d.%dm.dylib for Conda virtual environment installations
     PYDYLIB_NAMES = {
-        'Python', '.Python',
-        'Python%d' % _pyver[0],
-        'libpython%d.%d.dylib' % _pyver,
-        'libpython%d.%dm.dylib' % _pyver
+        "Python",
+        ".Python",
+        "Python%d" % _pyver[0],
+        "libpython%d.%d.dylib" % _pyver,
+        "libpython%d.%dm.dylib" % _pyver,
     }
 elif is_aix:
     # Shared libs on AIX may be archives with shared object members, hence the ".a" suffix. However, starting with
     # python 2.7.11 libpython?.?.so and Python3 libpython?.?m.so files are produced.
     PYDYLIB_NAMES = {
-        'libpython%d.%d.a' % _pyver,
-        'libpython%d.%dm.a' % _pyver,
-        'libpython%d.%d.so' % _pyver,
-        'libpython%d.%dm.so' % _pyver
+        "libpython%d.%d.a" % _pyver,
+        "libpython%d.%dm.a" % _pyver,
+        "libpython%d.%d.so" % _pyver,
+        "libpython%d.%dm.so" % _pyver,
     }
 elif is_freebsd:
     PYDYLIB_NAMES = {
-        'libpython%d.%d.so.1' % _pyver,
-        'libpython%d.%dm.so.1' % _pyver,
-        'libpython%d.%d.so.1.0' % _pyver,
-        'libpython%d.%dm.so.1.0' % _pyver
+        "libpython%d.%d.so.1" % _pyver,
+        "libpython%d.%dm.so.1" % _pyver,
+        "libpython%d.%d.so.1.0" % _pyver,
+        "libpython%d.%dm.so.1.0" % _pyver,
     }
 elif is_openbsd:
-    PYDYLIB_NAMES = {'libpython%d.%d.so.0.0' % _pyver, 'libpython%d.%dm.so.0.0' % _pyver}
+    PYDYLIB_NAMES = {
+        "libpython%d.%d.so.0.0" % _pyver,
+        "libpython%d.%dm.so.0.0" % _pyver,
+    }
 elif is_hpux:
-    PYDYLIB_NAMES = {'libpython%d.%d.so' % _pyver}
+    PYDYLIB_NAMES = {"libpython%d.%d.so" % _pyver}
 elif is_unix:
     # Other *nix platforms.
     # Python 2 .so library on Linux is: libpython2.7.so.1.0
     # Python 3 .so library on Linux is: libpython3.2mu.so.1.0, libpython3.3m.so.1.0
     PYDYLIB_NAMES = {
-        'libpython%d.%d.so.1.0' % _pyver,
-        'libpython%d.%dm.so.1.0' % _pyver,
-        'libpython%d.%dmu.so.1.0' % _pyver,
-        'libpython%d.%dm.so' % _pyver,
-        'libpython%d.%d.so' % _pyver
+        "libpython%d.%d.so.1.0" % _pyver,
+        "libpython%d.%dm.so.1.0" % _pyver,
+        "libpython%d.%dmu.so.1.0" % _pyver,
+        "libpython%d.%dm.so" % _pyver,
+        "libpython%d.%d.so" % _pyver,
     }
 else:
-    raise SystemExit('Your platform is not yet supported. Please define constant PYDYLIB_NAMES for your platform.')
+    raise SystemExit(
+        "Your platform is not yet supported. Please define constant PYDYLIB_NAMES for your platform."
+    )
 
 # In a virtual environment created by virtualenv (github.com/pypa/virtualenv) there exists sys.real_prefix with the path
 # to the base Python installation from which the virtual environment was created. This is true regardless of the version
@@ -145,20 +159,22 @@ else:
 # The following code creates compat.is_venv and is.virtualenv that are True when running a virtual environment, and also
 # compat.base_prefix with the path to the base Python installation.
 
-base_prefix: str = os.path.abspath(getattr(sys, 'real_prefix', getattr(sys, 'base_prefix', sys.prefix)))
+base_prefix: str = os.path.abspath(
+    getattr(sys, "real_prefix", getattr(sys, "base_prefix", sys.prefix))
+)
 # Ensure `base_prefix` is not containing any relative parts.
 is_venv = is_virtualenv = base_prefix != os.path.abspath(sys.prefix)
 
 # Conda environments sometimes have different paths or apply patches to packages that can affect how a hook or package
 # should access resources. Method for determining conda taken from https://stackoverflow.com/questions/47610844#47610844
-is_conda = os.path.isdir(os.path.join(base_prefix, 'conda-meta'))
+is_conda = os.path.isdir(os.path.join(base_prefix, "conda-meta"))
 
 # Similar to ``is_conda`` but is ``False`` using another ``venv``-like manager on top. In this case, no packages
 # encountered will be conda packages meaning that the default non-conda behaviour is generally desired from PyInstaller.
-is_pure_conda = os.path.isdir(os.path.join(sys.prefix, 'conda-meta'))
+is_pure_conda = os.path.isdir(os.path.join(sys.prefix, "conda-meta"))
 
 # Full path to python interpreter.
-python_executable = getattr(sys, '_base_executable', sys.executable)
+python_executable = getattr(sys, "_base_executable", sys.executable)
 
 # Is this Python from Microsoft App Store (Windows only)? Python from Microsoft App Store has executable pointing at
 # empty shims.
@@ -169,7 +185,7 @@ if is_ms_app_store:
     python_executable = os.path.join(base_prefix, os.path.basename(python_executable))
     if not os.path.exists(python_executable):
         raise SystemExit(
-            'PyInstaller cannot locate real python executable belonging to Python from Microsoft App Store!'
+            "PyInstaller cannot locate real python executable belonging to Python from Microsoft App Store!"
         )
 
 # Bytecode magic value
@@ -189,17 +205,17 @@ if is_win:
     except ImportError:
         # This environment variable is set by setup.py
         # - It's not an error for pywin32 to not be installed at that point
-        if not os.environ.get('PYINSTALLER_NO_PYWIN32_FAILURE'):
+        if not os.environ.get("PYINSTALLER_NO_PYWIN32_FAILURE"):
             raise SystemExit(
-                'PyInstaller cannot check for assembly dependencies.\n'
-                'Please install pywin32-ctypes.\n\n'
-                'pip install pywin32-ctypes\n'
+                "PyInstaller cannot check for assembly dependencies.\n"
+                "Please install pywin32-ctypes.\n\n"
+                "pip install pywin32-ctypes\n"
             )
     except Exception:
         if sys.flags.optimize == 2:
             raise SystemExit(
                 "pycparser, a Windows only indirect dependency of PyInstaller, is incompatible with "
-                "Python's \"discard docstrings\" (-OO) flag mode. For more information see:\n"
+                'Python\'s "discard docstrings" (-OO) flag mode. For more information see:\n'
                 "    https://github.com/pyinstaller/pyinstaller/issues/6345"
             )
         raise
@@ -207,13 +223,13 @@ if is_win:
 # macOS's platform.architecture() can be buggy, so we do this manually here. Based off the python documentation:
 # https://docs.python.org/3/library/platform.html#platform.architecture
 if is_darwin:
-    architecture = '64bit' if sys.maxsize > 2**32 else '32bit'
+    architecture = "64bit" if sys.maxsize > 2**32 else "32bit"
 else:
     architecture = platform.architecture()[0]
 
 # Cygwin needs special handling, because platform.system() contains identifiers such as MSYS_NT-10.0-19042 and
 # CYGWIN_NT-10.0-19042 that do not fit PyInstaller's OS naming scheme. Explicitly set `system` to 'Cygwin'.
-system = 'Cygwin' if is_cygwin else platform.system()
+system = "Cygwin" if is_cygwin else platform.system()
 
 # Machine suffix for bootloader.
 machine = _pyi_machine(platform.machine(), platform.system())
@@ -227,8 +243,8 @@ def is_wine_dll(filename: str | os.PathLike):
     Returns True if the given file is a Wine DLL, False if not (or if file cannot be analyzed or does not exist).
     """
     _WINE_SIGNATURES = (
-        b'Wine builtin DLL',  # PE-converted Wine DLL
-        b'Wine placeholder DLL',  # Fake/placeholder Wine DLL
+        b"Wine builtin DLL",  # PE-converted Wine DLL
+        b"Wine placeholder DLL",  # Fake/placeholder Wine DLL
     )
     _MAX_LEN = max([len(sig) for sig in _WINE_SIGNATURES])
 
@@ -236,7 +252,7 @@ def is_wine_dll(filename: str | os.PathLike):
     # to compare the bytes that come right after IMAGE_DOS_HEADER, i.e., after initial 64 bytes. We can read the file
     # directly and avoid using the pefile library to avoid performance penalty associated with full header parsing.
     try:
-        with open(filename, 'rb') as fp:
+        with open(filename, "rb") as fp:
             fp.seek(64)
             signature = fp.read(_MAX_LEN)
         return signature.startswith(_WINE_SIGNATURES)
@@ -248,7 +264,8 @@ def is_wine_dll(filename: str | os.PathLike):
 if is_win:
     try:
         import ctypes.util  # noqa: E402
-        is_win_wine = is_wine_dll(ctypes.util.find_library('kernel32'))
+
+        is_win_wine = is_wine_dll(ctypes.util.find_library("kernel32"))
     except Exception:
         pass
 
@@ -287,7 +304,10 @@ def unsetenv(name: str):
 
 
 def exec_command(
-    *cmdargs: str, encoding: str | None = None, raise_enoent: bool | None = None, **kwargs: int | bool | list | None
+    *cmdargs: str,
+    encoding: str | None = None,
+    raise_enoent: bool | None = None,
+    **kwargs: int | bool | list | None,
 ):
     """
     Run the command specified by the passed positional arguments, optionally configured by the passed keyword arguments.
@@ -341,10 +361,10 @@ def exec_command(
     except OSError as e:
         if raise_enoent and e.errno == errno.ENOENT:
             raise
-        print('--' * 20, file=sys.stderr)
+        print("--" * 20, file=sys.stderr)
         print("Error running '%s':" % " ".join(cmdargs), file=sys.stderr)
         print(e, file=sys.stderr)
-        print('--' * 20, file=sys.stderr)
+        print("--" * 20, file=sys.stderr)
         raise ExecCommandFailed("Error: Executing command failed!") from e
     except subprocess.TimeoutExpired:
         proc.kill()
@@ -359,10 +379,10 @@ def exec_command(
             out = os.fsdecode(out)
     except UnicodeDecodeError as e:
         # The sub-process used a different encoding; provide more information to ease debugging.
-        print('--' * 20, file=sys.stderr)
+        print("--" * 20, file=sys.stderr)
         print(str(e), file=sys.stderr)
-        print('These are the bytes around the offending byte:', file=sys.stderr)
-        print('--' * 20, file=sys.stderr)
+        print("These are the bytes around the offending byte:", file=sys.stderr)
+        print("--" * 20, file=sys.stderr)
         raise
     return out
 
@@ -390,13 +410,15 @@ def exec_command_rc(*cmdargs: str, **kwargs: float | bool | list | None):
     """
 
     # 'encoding' keyword is not supported for 'subprocess.call'; remove it from kwargs.
-    if 'encoding' in kwargs:
-        kwargs.pop('encoding')
+    if "encoding" in kwargs:
+        kwargs.pop("encoding")
     return subprocess.call(cmdargs, **kwargs)
 
 
 def exec_command_stdout(
-    *command_args: str, encoding: str | None = None, **kwargs: float | str | bytes | bool | list | None
+    *command_args: str,
+    encoding: str | None = None,
+    **kwargs: float | str | bytes | bool | list | None,
 ):
     """
     Capture and return the standard output of the command specified by the passed positional arguments, optionally
@@ -433,7 +455,7 @@ def exec_command_stdout(
 
     # If no encoding was specified, the current locale is defaulted to. Else, an encoding was specified. To ensure this
     # encoding is respected, the "universal_newlines" option is disabled if also passed. Nice, eh?
-    kwargs['universal_newlines'] = encoding is None
+    kwargs["universal_newlines"] = encoding is None
 
     # Standard output captured from this command as a decoded Unicode string if "universal_newlines" is enabled or an
     # encoded byte array otherwise.
@@ -443,7 +465,9 @@ def exec_command_stdout(
     return stdout if encoding is None else stdout.decode(encoding)
 
 
-def exec_command_all(*cmdargs: str, encoding: str | None = None, **kwargs: int | bool | list | None):
+def exec_command_all(
+    *cmdargs: str, encoding: str | None = None, **kwargs: int | bool | list | None
+):
     """
     Run the command specified by the passed positional arguments, optionally configured by the passed keyword arguments.
 
@@ -474,7 +498,7 @@ def exec_command_all(*cmdargs: str, encoding: str | None = None, **kwargs: int |
         bufsize=-1,  # Default OS buffer size.
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        **kwargs
+        **kwargs,
     )
     # Waits for subprocess to complete.
     try:
@@ -493,10 +517,10 @@ def exec_command_all(*cmdargs: str, encoding: str | None = None, **kwargs: int |
             err = os.fsdecode(err)
     except UnicodeDecodeError as e:
         # The sub-process used a different encoding, provide more information to ease debugging.
-        print('--' * 20, file=sys.stderr)
+        print("--" * 20, file=sys.stderr)
         print(str(e), file=sys.stderr)
-        print('These are the bytes around the offending byte:', file=sys.stderr)
-        print('--' * 20, file=sys.stderr)
+        print("These are the bytes around the offending byte:", file=sys.stderr)
+        print("--" * 20, file=sys.stderr)
         raise
 
     return proc.returncode, out, err
@@ -509,35 +533,35 @@ def __wrap_python(args, kwargs):
     # binaries are running for the same architecture as python executable. It is necessary to run binaries with 'arch'
     # command.
     if is_darwin:
-        if architecture == '64bit':
-            if platform.machine() == 'arm64':
-                py_prefix = ['arch', '-arm64']  # Apple M1
+        if architecture == "64bit":
+            if platform.machine() == "arm64":
+                py_prefix = ["arch", "-arm64"]  # Apple M1
             else:
-                py_prefix = ['arch', '-x86_64']  # Intel
-        elif architecture == '32bit':
-            py_prefix = ['arch', '-i386']
+                py_prefix = ["arch", "-x86_64"]  # Intel
+        elif architecture == "32bit":
+            py_prefix = ["arch", "-i386"]
         else:
             py_prefix = []
         # Since Mac OS 10.11, the environment variable DYLD_LIBRARY_PATH is no more inherited by child processes, so we
         # proactively propagate the current value using the `-e` option of the `arch` command.
-        if 'DYLD_LIBRARY_PATH' in os.environ:
-            path = os.environ['DYLD_LIBRARY_PATH']
-            py_prefix += ['-e', 'DYLD_LIBRARY_PATH=%s' % path]
+        if "DYLD_LIBRARY_PATH" in os.environ:
+            path = os.environ["DYLD_LIBRARY_PATH"]
+            py_prefix += ["-e", "DYLD_LIBRARY_PATH=%s" % path]
         cmdargs = py_prefix + cmdargs
 
     if not __debug__:
-        cmdargs.append('-O')
+        cmdargs.append("-O")
 
     cmdargs.extend(args)
 
-    env = kwargs.get('env')
+    env = kwargs.get("env")
     if env is None:
         env = dict(**os.environ)
 
     # Ensure python 3 subprocess writes 'str' as utf-8
-    env['PYTHONIOENCODING'] = 'UTF-8'
+    env["PYTHONIOENCODING"] = "UTF-8"
     # ... and ensure we read output as utf-8
-    kwargs['encoding'] = 'UTF-8'
+    kwargs["encoding"] = "UTF-8"
 
     return cmdargs, kwargs
 
@@ -593,8 +617,12 @@ def getsitepackages(prefixes: list | None = None):
             continue
         seen.add(prefix)
 
-        if os.sep == '/':
-            sitepackages.append(os.path.join(prefix, "lib", "python%d.%d" % sys.version_info[:2], "site-packages"))
+        if os.sep == "/":
+            sitepackages.append(
+                os.path.join(
+                    prefix, "lib", "python%d.%d" % sys.version_info[:2], "site-packages"
+                )
+            )
         else:
             sitepackages.append(prefix)
             sitepackages.append(os.path.join(prefix, "lib", "site-packages"))
@@ -602,7 +630,7 @@ def getsitepackages(prefixes: list | None = None):
 
 
 # Backported for virtualenv. Module 'site' in virtualenv might not have this attribute.
-getsitepackages = getattr(site, 'getsitepackages', getsitepackages)
+getsitepackages = getattr(site, "getsitepackages", getsitepackages)
 
 
 # Wrapper to load a module from a Python source file. This function loads import hooks when processing them.
@@ -618,118 +646,118 @@ def importlib_load_source(name: str, pathname: str):
 # modules used by PyInstaller's bootstrap scripts and modules (loader/pyi*.py)
 
 PY3_BASE_MODULES = {
-    '_collections_abc',
-    '_weakrefset',
-    'abc',
-    'codecs',
-    'collections',
-    'copyreg',
-    'encodings',
-    'enum',
-    'fnmatch',  # dependency of pathlib
-    'functools',
-    'genericpath',  # dependency of os.path
-    'io',  # used by loader/pymod02_importers.py
-    'heapq',
-    'keyword',
-    'linecache',
-    'locale',
-    'ntpath',  # dependency of os.path
-    'operator',
-    'os',
-    'pathlib',  # used by loader/pymod02_importers.py
-    'posixpath',  # dependency of os.path
-    're',
-    'reprlib',
-    'sre_compile',
-    'sre_constants',
-    'sre_parse',
-    'stat',  # dependency of os.path
-    'token',  # depdendency of tokenize
-    'tokenize',  # used by loader/pymod02_importers.py
-    'traceback',  # for startup errors
-    'types',
-    'urllib',  # dependency of pathlib
-    'weakref',
-    'warnings',
+    "_collections_abc",
+    "_weakrefset",
+    "abc",
+    "codecs",
+    "collections",
+    "copyreg",
+    "encodings",
+    "enum",
+    "fnmatch",  # dependency of pathlib
+    "functools",
+    "genericpath",  # dependency of os.path
+    "io",  # used by loader/pymod02_importers.py
+    "heapq",
+    "keyword",
+    "linecache",
+    "locale",
+    "ntpath",  # dependency of os.path
+    "operator",
+    "os",
+    "pathlib",  # used by loader/pymod02_importers.py
+    "posixpath",  # dependency of os.path
+    "re",
+    "reprlib",
+    "sre_compile",
+    "sre_constants",
+    "sre_parse",
+    "stat",  # dependency of os.path
+    "token",  # depdendency of tokenize
+    "tokenize",  # used by loader/pymod02_importers.py
+    "traceback",  # for startup errors
+    "types",
+    "urllib",  # dependency of pathlib
+    "weakref",
+    "warnings",
 }
 
 if not is_py310:
-    PY3_BASE_MODULES.add('_bootlocale')
+    PY3_BASE_MODULES.add("_bootlocale")
 
 # Object types of Pure Python modules in modulegraph dependency graph.
 # Pure Python modules have code object (attribute co_code).
 PURE_PYTHON_MODULE_TYPES = {
-    'SourceModule',
-    'CompiledModule',
-    'Package',
-    'NamespacePackage',
+    "SourceModule",
+    "CompiledModule",
+    "Package",
+    "NamespacePackage",
     # Deprecated.
     # TODO Could these module types be removed?
-    'FlatPackage',
-    'ArchiveModule',
+    "FlatPackage",
+    "ArchiveModule",
 }
 # Object types of special Python modules (built-in, run-time, namespace package) in modulegraph dependency graph that do
 # not have code object.
 SPECIAL_MODULE_TYPES = {
-    'AliasNode',
-    'BuiltinModule',
-    'RuntimeModule',
-    'RuntimePackage',
-
+    "AliasNode",
+    "BuiltinModule",
+    "RuntimeModule",
+    "RuntimePackage",
     # PyInstaller handles scripts differently and not as standard Python modules.
-    'Script',
+    "Script",
 }
 # Object types of Binary Python modules (extensions, etc) in modulegraph dependency graph.
 BINARY_MODULE_TYPES = {
-    'Extension',
-    'ExtensionPackage',
+    "Extension",
+    "ExtensionPackage",
 }
 # Object types of valid Python modules in modulegraph dependency graph.
-VALID_MODULE_TYPES = PURE_PYTHON_MODULE_TYPES | SPECIAL_MODULE_TYPES | BINARY_MODULE_TYPES
+VALID_MODULE_TYPES = (
+    PURE_PYTHON_MODULE_TYPES | SPECIAL_MODULE_TYPES | BINARY_MODULE_TYPES
+)
 # Object types of bad/missing/invalid Python modules in modulegraph dependency graph.
 # TODO: should be 'Invalid' module types also in the 'MISSING' set?
 BAD_MODULE_TYPES = {
-    'BadModule',
-    'ExcludedModule',
-    'InvalidSourceModule',
-    'InvalidCompiledModule',
-    'MissingModule',
-
+    "BadModule",
+    "ExcludedModule",
+    "InvalidSourceModule",
+    "InvalidCompiledModule",
+    "MissingModule",
     # Runtime modules and packages are technically valid rather than bad, but exist only in-memory rather than on-disk
     # (typically due to pre_safe_import_module() hooks), and hence cannot be physically frozen. For simplicity, these
     # nodes are categorized as bad rather than valid.
-    'RuntimeModule',
-    'RuntimePackage',
+    "RuntimeModule",
+    "RuntimePackage",
 }
 ALL_MODULE_TYPES = VALID_MODULE_TYPES | BAD_MODULE_TYPES
 # TODO: review this mapping to TOC, remove useless entries.
 # Dictionary to map ModuleGraph node types to TOC typecodes.
 MODULE_TYPES_TO_TOC_DICT = {
     # Pure modules.
-    'AliasNode': 'PYMODULE',
-    'Script': 'PYSOURCE',
-    'SourceModule': 'PYMODULE',
-    'CompiledModule': 'PYMODULE',
-    'Package': 'PYMODULE',
-    'FlatPackage': 'PYMODULE',
-    'ArchiveModule': 'PYMODULE',
+    "AliasNode": "PYMODULE",
+    "Script": "PYSOURCE",
+    "SourceModule": "PYMODULE",
+    "CompiledModule": "PYMODULE",
+    "Package": "PYMODULE",
+    "FlatPackage": "PYMODULE",
+    "ArchiveModule": "PYMODULE",
     # Binary modules.
-    'Extension': 'EXTENSION',
-    'ExtensionPackage': 'EXTENSION',
+    "Extension": "EXTENSION",
+    "ExtensionPackage": "EXTENSION",
     # Special valid modules.
-    'BuiltinModule': 'BUILTIN',
-    'NamespacePackage': 'PYMODULE',
+    "BuiltinModule": "BUILTIN",
+    "NamespacePackage": "PYMODULE",
     # Bad modules.
-    'BadModule': 'bad',
-    'ExcludedModule': 'excluded',
-    'InvalidSourceModule': 'invalid',
-    'InvalidCompiledModule': 'invalid',
-    'MissingModule': 'missing',
-    'RuntimeModule': 'runtime',
-    'RuntimePackage': 'runtime',
+    "BadModule": "bad",
+    "ExcludedModule": "excluded",
+    "InvalidSourceModule": "invalid",
+    "InvalidCompiledModule": "invalid",
+    "MissingModule": "missing",
+    "RuntimeModule": "runtime",
+    "RuntimePackage": "runtime",
     # Other.
-    'does not occur': 'BINARY',
+    "does not occur": "BINARY",
 }
 
 
@@ -741,7 +769,7 @@ def check_requirements():
     """
     # Fail hard if Python does not have minimum required version
     if sys.version_info < (3, 7):
-        raise EnvironmentError('PyInstaller requires at Python 3.7 or newer.')
+        raise EnvironmentError("PyInstaller requires at Python 3.7 or newer.")
 
     # There are some old packages which used to be backports of libraries which are now part of the standard library.
     # These backports are now unmaintained and contain only an older subset of features leading to obscure errors like
@@ -751,17 +779,27 @@ def check_requirements():
     else:
         from importlib_metadata import distribution, PackageNotFoundError
 
-    for name in ["enum34", "typing", "pathlib"]:
-        try:
-            dist = distribution(name)
-        except PackageNotFoundError:
-            continue
-        remove = "conda remove" if is_conda else f'"{sys.executable}" -m pip uninstall {name}'
-        raise SystemExit(
-            f"The '{name}' package is an obsolete backport of a standard library package and is incompatible with "
-            f"PyInstaller. Please remove this package (located in {dist.locate_file('')}) using\n    {remove}\n"
-            "then try again."
-        )
+    ##########################################################################################################################
+    #                    By: Greg Beck, Project Engineer, Nissha USA, Dated 21 Apr 2023                                      #
+    #                                                                                                                        #
+    #               This section is commented out so that PyInstaller doesn't check if pathlib is installed.                 #
+    #                  Reference https://github.com/pyinstaller/pyinstaller/issues/7583                                      #
+    #                    This fork may be deleted pending the action Anaconda takes with this action:                        #
+    #                              https://github.com/ContinuumIO/anaconda-issues/issues/13176                               #
+    #                                                                                                                        #
+    ##########################################################################################################################
+    # for name in ["enum34", "typing", "pathlib"]:                                                                       #
+    # try:                                                                                                           #
+    # dist = distribution(name)                                                                                  #
+    # except PackageNotFoundError:                                                                                   #
+    # continue                                                                                                   #
+    # remove = "conda remove" if is_conda else f'"{sys.executable}" -m pip uninstall {name}'                         #
+    # raise SystemExit(                                                                                              #
+    # f"The '{name}' package is an obsolete backport of a standard library package and is incompatible with "    #
+    # f"PyInstaller. Please remove this package (located in {dist.locate_file('')}) using\n    {remove}\n"       #
+    # "then try again."                                                                                          #
+    # )                                                                                                              #
+    ##########################################################################################################################
 
     # Bail out if binutils is not installed.
     if is_linux and shutil.which("objdump") is None:
