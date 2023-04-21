@@ -11,7 +11,7 @@ for name in ["enum34", "typing", "pathlib"]:
 		dist = distribution(name)
 		except PackageNotFoundError:
 		continue
-	remove = "conda remove" if is_conda else f'"{sys.executable}" -m pip 				uninstall {name}'
+	remove = "conda remove" if is_conda else f'"{sys.executable}" -m pip uninstall {name}'
 		raise SystemExit(
 		f"The '{name}' package is an obsolete backport of a standard library package and is incompatible with "
 		f"PyInstaller. Please remove this package (located in {dist.locate_file('')}) using\n    {remove}\n"
